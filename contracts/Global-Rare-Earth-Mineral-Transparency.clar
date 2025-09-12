@@ -65,6 +65,16 @@
 
 (define-map authorized-verifiers principal bool)
 
+(define-map authorized-certifiers principal bool)
+
+(define-map batch-certifications
+    { batch-id: uint, certifier: principal }
+    {
+        certification-data: (string-ascii 200),
+        certified-at: uint
+    }
+)
+
 (define-public (register-mine 
     (name (string-ascii 100))
     (location (string-ascii 100)) 
@@ -262,6 +272,37 @@
     )
 )
 
+(define-public (add-authorized-certifier (certifier principal))
+    (begin
+        (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+        (map-set authorized-certifiers certifier true)
+        (ok true)
+    )
+)
+
+(define-public (remove-authorized-certifier (certifier principal))
+    (begin
+        (asserts! (is-eq tx-sender contract-owner) err-owner-only)
+        (map-delete authorized-certifiers certifier)
+        (ok true)
+    )
+)
+
+(define-public (certify-batch (batch-id uint) (certification-data (string-ascii 200)))
+    (let ((batch (unwrap! (map-get? mineral-batches { batch-id: batch-id }) err-not-found)))
+        (asserts! (default-to false (map-get? authorized-certifiers tx-sender)) err-not-authorized)
+        (asserts! (> (len certification-data) u0) err-invalid-params)
+        (map-set batch-certifications
+            { batch-id: batch-id, certifier: tx-sender }
+            {
+                certification-data: certification-data,
+                certified-at: stacks-block-height
+            }
+        )
+        (ok true)
+    )
+)
+
 (define-read-only (get-mine (mine-id uint))
     (map-get? mines { mine-id: mine-id })
 )
@@ -287,6 +328,14 @@
         batch (map-get? mines { mine-id: (get mine-id batch) })
         none
     )
+)
+
+(define-read-only (is-authorized-certifier (certifier principal))
+    (default-to false (map-get? authorized-certifiers certifier))
+)
+
+(define-read-only (get-batch-certification (batch-id uint) (certifier principal))
+    (map-get? batch-certifications { batch-id: batch-id, certifier: certifier })
 )
 
 (define-private (get-batch-history-count (batch-id uint))
