@@ -75,6 +75,11 @@
     }
 )
 
+(define-map paused-batches
+    { batch-id: uint }
+    bool
+)
+
 (define-public (register-mine 
     (name (string-ascii 100))
     (location (string-ascii 100)) 
@@ -154,6 +159,7 @@
     (let ((batch (unwrap! (map-get? mineral-batches { batch-id: batch-id }) err-not-found))
           (history-count (get-batch-history-count batch-id)))
         (asserts! (is-eq tx-sender (get current-owner batch)) err-not-authorized)
+        (asserts! (not (default-to false (map-get? paused-batches { batch-id: batch-id }))) err-invalid-status)
         (map-set mineral-batches 
             { batch-id: batch-id }
             (merge batch { 
@@ -174,7 +180,7 @@
     )
 )
 
-(define-public (create-shipment 
+(define-public (create-shipment
     (batch-id uint)
     (from-location (string-ascii 100))
     (to-location (string-ascii 100))
@@ -182,6 +188,7 @@
     (let ((shipment-id (var-get next-shipment-id))
           (batch (unwrap! (map-get? mineral-batches { batch-id: batch-id }) err-not-found)))
         (asserts! (is-eq tx-sender (get current-owner batch)) err-not-authorized)
+        (asserts! (not (default-to false (map-get? paused-batches { batch-id: batch-id }))) err-invalid-status)
         (asserts! (> (len from-location) u0) err-invalid-params)
         (asserts! (> (len to-location) u0) err-invalid-params)
         (map-set shipments 
@@ -303,6 +310,22 @@
     )
 )
 
+(define-public (pause-batch (batch-id uint))
+    (let ((batch (unwrap! (map-get? mineral-batches { batch-id: batch-id }) err-not-found)))
+        (asserts! (or (is-eq tx-sender contract-owner) (default-to false (map-get? authorized-verifiers tx-sender))) err-not-authorized)
+        (map-set paused-batches { batch-id: batch-id } true)
+        (ok true)
+    )
+)
+
+(define-public (unpause-batch (batch-id uint))
+    (let ((batch (unwrap! (map-get? mineral-batches { batch-id: batch-id }) err-not-found)))
+        (asserts! (or (is-eq tx-sender contract-owner) (default-to false (map-get? authorized-verifiers tx-sender))) err-not-authorized)
+        (map-delete paused-batches { batch-id: batch-id })
+        (ok true)
+    )
+)
+
 (define-read-only (get-mine (mine-id uint))
     (map-get? mines { mine-id: mine-id })
 )
@@ -336,6 +359,10 @@
 
 (define-read-only (get-batch-certification (batch-id uint) (certifier principal))
     (map-get? batch-certifications { batch-id: batch-id, certifier: certifier })
+)
+
+(define-read-only (is-batch-paused (batch-id uint))
+    (default-to false (map-get? paused-batches { batch-id: batch-id }))
 )
 
 (define-private (get-batch-history-count (batch-id uint))

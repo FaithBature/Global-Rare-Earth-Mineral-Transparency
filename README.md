@@ -187,3 +187,42 @@ This initial version provides core traceability features. Future enhancements ma
 - Advanced analytics dashboard
 - Integration with existing ERP systems
 - Mobile app for field operations
+
+## 🚨 Batch Pause/Unpause
+
+### Emergency Compliance Control
+- **Pause Batches:** Authorized verifiers or contract owner can freeze batches for regulatory issues
+- **Unpause Batches:** Restore normal operations once issues are resolved
+- **Status Queries:** Check if a batch is currently paused
+
+### Usage Examples
+
+#### Pause a Batch (Authorized Only)
+```clarity
+(contract-call? .Global-Rare-Earth-Mineral-Transparency pause-batch u1)
+```
+
+#### Unpause a Batch (Authorized Only)
+```clarity
+(contract-call? .Global-Rare-Earth-Mineral-Transparency unpause-batch u1)
+```
+
+#### Check Pause Status
+```clarity
+(contract-call? .Global-Rare-Earth-Mineral-Transparency is-batch-paused u1)
+```
+
+### Security Features
+- Multi-level authorization (owner + verifiers only)
+- Prevents transfers and shipments when paused
+- Immutable pause records on-chain
+- Rapid emergency response capability
+
+### Integration with Supply Chain
+When a batch is paused:
+- ❌ Transfer operations blocked
+- ❌ Shipment creation blocked
+- ✅ All other operations continue normally
+- 🔄 Unpause restores full functionality
+
+This feature enhances regulatory compliance and provides stakeholders with confidence in the system's ability to handle emergencies swiftly and transparently.
