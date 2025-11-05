@@ -226,3 +226,37 @@ When a batch is paused:
 - 🔄 Unpause restores full functionality
 
 This feature enhances regulatory compliance and provides stakeholders with confidence in the system's ability to handle emergencies swiftly and transparently.
+
+## 🚨 Batch Recall System
+
+### Product Safety & Compliance Control
+- **Recall Batches:** Authorized verifiers or contract owner can initiate recalls for safety or compliance issues
+- **Status Queries:** Check if a batch is currently recalled
+- **Permanent Action:** Recalled batches cannot be transferred or shipped, ensuring product safety
+
+### Usage Examples
+
+#### Initiate Batch Recall (Authorized Only)
+```clarity
+(contract-call? .Global-Rare-Earth-Mineral-Transparency recall-batch u1)
+```
+
+#### Check Recall Status
+```clarity
+(contract-call? .Global-Rare-Earth-Mineral-Transparency is-batch-recalled u1)
+```
+
+### Security Features
+- Multi-level authorization (owner + verifiers only)
+- Prevents transfers and shipments when recalled
+- Immutable recall records on-chain
+- Critical safety response capability
+
+### Integration with Supply Chain
+When a batch is recalled:
+- ❌ Transfer operations blocked
+- ❌ Shipment creation blocked
+- ✅ All other operations continue normally
+- 🔄 Recall is permanent for safety assurance
+
+This feature empowers stakeholders to act decisively on safety concerns, maintaining trust in the mineral supply chain integrity.

@@ -80,6 +80,11 @@
     bool
 )
 
+(define-map recalled-batches
+    { batch-id: uint }
+    bool
+)
+
 (define-public (register-mine 
     (name (string-ascii 100))
     (location (string-ascii 100)) 
@@ -189,6 +194,8 @@
           (batch (unwrap! (map-get? mineral-batches { batch-id: batch-id }) err-not-found)))
         (asserts! (is-eq tx-sender (get current-owner batch)) err-not-authorized)
         (asserts! (not (default-to false (map-get? paused-batches { batch-id: batch-id }))) err-invalid-status)
+        (asserts! (not (default-to false (map-get? recalled-batches { batch-id: batch-id }))) err-invalid-status)
+        (asserts! (not (default-to false (map-get? recalled-batches { batch-id: batch-id }))) err-invalid-status)
         (asserts! (> (len from-location) u0) err-invalid-params)
         (asserts! (> (len to-location) u0) err-invalid-params)
         (map-set shipments 
@@ -326,6 +333,14 @@
     )
 )
 
+(define-public (recall-batch (batch-id uint))
+    (let ((batch (unwrap! (map-get? mineral-batches { batch-id: batch-id }) err-not-found)))
+        (asserts! (or (is-eq tx-sender contract-owner) (default-to false (map-get? authorized-verifiers tx-sender))) err-not-authorized)
+        (map-set recalled-batches { batch-id: batch-id } true)
+        (ok true)
+    )
+)
+
 (define-read-only (get-mine (mine-id uint))
     (map-get? mines { mine-id: mine-id })
 )
@@ -363,6 +378,10 @@
 
 (define-read-only (is-batch-paused (batch-id uint))
     (default-to false (map-get? paused-batches { batch-id: batch-id }))
+)
+
+(define-read-only (is-batch-recalled (batch-id uint))
+    (default-to false (map-get? recalled-batches { batch-id: batch-id }))
 )
 
 (define-private (get-batch-history-count (batch-id uint))
