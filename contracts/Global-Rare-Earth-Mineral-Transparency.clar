@@ -341,6 +341,14 @@
     )
 )
 
+(define-public (transfer-mine-ownership (mine-id uint) (new-owner principal))
+    (let ((mine (unwrap! (map-get? mines { mine-id: mine-id }) err-not-found)))
+        (asserts! (is-eq tx-sender (get owner mine)) err-not-authorized)
+        (map-set mines { mine-id: mine-id } (merge mine { owner: new-owner }))
+        (ok true)
+    )
+)
+
 (define-read-only (get-mine (mine-id uint))
     (map-get? mines { mine-id: mine-id })
 )

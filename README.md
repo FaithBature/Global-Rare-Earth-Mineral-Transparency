@@ -260,3 +260,32 @@ When a batch is recalled:
 - 🔄 Recall is permanent for safety assurance
 
 This feature empowers stakeholders to act decisively on safety concerns, maintaining trust in the mineral supply chain integrity.
+
+## 🔄 Mine Ownership Transfer
+
+### Dynamic Mine Management
+- **Transfer Ownership:** Mine owners can securely transfer mine ownership to new principals
+- **Business Flexibility:** Supports restructuring, sales, or operational changes
+- **Traceability Maintained:** Updates ownership records while preserving verification status
+
+### Usage Examples
+
+#### Transfer Mine Ownership (Owner Only)
+```clarity
+(contract-call? .Global-Rare-Earth-Mineral-Transparency transfer-mine-ownership
+    u1
+    'ST2CY5V39NHDPWSXMW9QDT3HC3GD6Q6XX4CFRK9AG)
+```
+
+### Security Features
+- Owner-only authorization
+- Immutable transfer records
+- Preserves mine verification and ESG data
+
+### Integration with Supply Chain
+When ownership is transferred:
+- ✅ Mine remains verified if previously verified
+- ✅ Existing batches retain origin traceability
+- 🔄 New owner gains full mine management rights
+
+This feature enables dynamic mine operations while maintaining supply chain integrity.
